@@ -28,6 +28,7 @@ public class MediaExtractorUtils {
         private TrackResult() {
         }
 
+        public static final int TRACK_NOT_FOUND = -1;
         public int mVideoTrackIndex;
         public String mVideoTrackMime;
         public MediaFormat mVideoTrackFormat;
@@ -38,25 +39,25 @@ public class MediaExtractorUtils {
 
     public static TrackResult getFirstVideoAndAudioTrack(MediaExtractor extractor) {
         TrackResult trackResult = new TrackResult();
-        trackResult.mVideoTrackIndex = -1;
-        trackResult.mAudioTrackIndex = -1;
+        trackResult.mVideoTrackIndex = TrackResult.TRACK_NOT_FOUND;
+        trackResult.mAudioTrackIndex = TrackResult.TRACK_NOT_FOUND;
         int trackCount = extractor.getTrackCount();
         for (int i = 0; i < trackCount; i++) {
             MediaFormat format = extractor.getTrackFormat(i);
             String mime = format.getString(MediaFormat.KEY_MIME);
-            if (trackResult.mVideoTrackIndex < 0 && mime.startsWith("video/")) {
+            if (trackResult.mVideoTrackIndex == TrackResult.TRACK_NOT_FOUND && mime.startsWith("video/")) {
                 trackResult.mVideoTrackIndex = i;
                 trackResult.mVideoTrackMime = mime;
                 trackResult.mVideoTrackFormat = format;
-            } else if (trackResult.mAudioTrackIndex < 0 && mime.startsWith("audio/")) {
+            } else if (trackResult.mAudioTrackIndex == TrackResult.TRACK_NOT_FOUND && mime.startsWith("audio/")) {
                 trackResult.mAudioTrackIndex = i;
                 trackResult.mAudioTrackMime = mime;
                 trackResult.mAudioTrackFormat = format;
             }
-            if (trackResult.mVideoTrackIndex >= 0 && trackResult.mAudioTrackIndex >= 0) break;
+            if (trackResult.mVideoTrackIndex != TrackResult.TRACK_NOT_FOUND && trackResult.mAudioTrackIndex != TrackResult.TRACK_NOT_FOUND) break;
         }
-        if (trackResult.mVideoTrackIndex < 0 || trackResult.mAudioTrackIndex < 0) {
-            throw new IllegalArgumentException("extractor does not contain video and/or audio tracks.");
+        if (trackResult.mVideoTrackIndex == TrackResult.TRACK_NOT_FOUND) {
+            throw new IllegalArgumentException("extractor does not contain video track.");
         }
         return trackResult;
     }
