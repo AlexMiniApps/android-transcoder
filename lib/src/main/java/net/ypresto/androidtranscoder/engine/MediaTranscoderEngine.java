@@ -172,7 +172,9 @@ public class MediaTranscoderEngine {
             @Override
             public void onDetermineOutputFormat() {
                 MediaFormatValidator.validateVideoOutputFormat(mVideoTrackTranscoder.getDeterminedFormat());
-                MediaFormatValidator.validateAudioOutputFormat(mAudioTrackTranscoder.getDeterminedFormat());
+                if (mAudioTrackTranscoder != null) {
+                    MediaFormatValidator.validateAudioOutputFormat(mAudioTrackTranscoder.getDeterminedFormat());
+                }
             }
         });
 
@@ -207,15 +209,14 @@ public class MediaTranscoderEngine {
         }
         while (!(mVideoTrackTranscoder.isFinished() &&
                 (mAudioTrackTranscoder == null || mAudioTrackTranscoder.isFinished()))) {
-            boolean stepped = mVideoTrackTranscoder.stepPipeline() || (mAudioTrackTranscoder == null || mAudioTrackTranscoder.stepPipeline());
+            boolean stepped = mVideoTrackTranscoder.stepPipeline() || (mAudioTrackTranscoder != null && mAudioTrackTranscoder.stepPipeline());
             loopCount++;
             if (mDurationUs > 0 && loopCount % PROGRESS_INTERVAL_STEPS == 0) {
                 double videoProgress = mVideoTrackTranscoder.isFinished() ? 1.0 : Math.min(1.0, (double) mVideoTrackTranscoder.getWrittenPresentationTimeUs() / mDurationUs);
-                double audioProgress = 1.0;
-                if (mAudioTrackTranscoder != null) {
-                    audioProgress = mAudioTrackTranscoder.isFinished() ? 1.0 : Math.min(1.0, (double) mAudioTrackTranscoder.getWrittenPresentationTimeUs() / mDurationUs);
-                }
-                double progress = (videoProgress + audioProgress) / 2.0;
+                double audioProgress = mAudioTrackTranscoder == null ? 0 :
+                        mAudioTrackTranscoder.isFinished() ? 1.0 : Math.min(1.0, (double) mAudioTrackTranscoder.getWrittenPresentationTimeUs() / mDurationUs);
+                double total = mAudioTrackTranscoder == null ? 1.0 : 2.0;
+                double progress = (videoProgress + audioProgress) / total;
                 mProgress = progress;
                 if (mProgressCallback != null) mProgressCallback.onProgress(progress);
             }
