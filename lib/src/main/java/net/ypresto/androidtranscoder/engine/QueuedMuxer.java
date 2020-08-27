@@ -40,9 +40,11 @@ public class QueuedMuxer {
     private ByteBuffer mByteBuffer;
     private final List<SampleInfo> mSampleInfoList;
     private boolean mStarted;
+    private final boolean mIsAudioTrackExists;
 
-    public QueuedMuxer(MediaMuxer muxer, Listener listener) {
+    public QueuedMuxer(MediaMuxer muxer, boolean isAudioTrackExists, Listener listener) {
         mMuxer = muxer;
+        mIsAudioTrackExists = isAudioTrackExists;
         mListener = listener;
         mSampleInfoList = new ArrayList<>();
     }
@@ -62,7 +64,7 @@ public class QueuedMuxer {
     }
 
     private void onSetOutputFormat() {
-        if (mVideoFormat == null) return;
+        if (mVideoFormat == null || (mIsAudioTrackExists && mAudioFormat == null)) return;
         mListener.onDetermineOutputFormat();
 
         mVideoTrackIndex = mMuxer.addTrack(mVideoFormat);

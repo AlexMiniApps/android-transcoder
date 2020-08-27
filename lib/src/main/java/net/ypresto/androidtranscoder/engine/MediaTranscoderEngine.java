@@ -22,7 +22,6 @@ import android.media.MediaMuxer;
 import android.os.Build;
 import android.util.Log;
 
-import net.ypresto.androidtranscoder.BuildConfig;
 import net.ypresto.androidtranscoder.format.MediaFormatStrategy;
 import net.ypresto.androidtranscoder.utils.ISO6709LocationParser;
 import net.ypresto.androidtranscoder.utils.MediaExtractorUtils;
@@ -168,7 +167,7 @@ public class MediaTranscoderEngine {
         if (videoOutputFormat == null && audioOutputFormat == null) {
             throw new InvalidOutputFormatException("MediaFormatStrategy returned pass-through for both video and audio. No transcoding is necessary.");
         }
-        QueuedMuxer queuedMuxer = new QueuedMuxer(mMuxer, new QueuedMuxer.Listener() {
+        QueuedMuxer queuedMuxer = new QueuedMuxer(mMuxer, isAudioTrackExists, new QueuedMuxer.Listener() {
             @Override
             public void onDetermineOutputFormat() {
                 MediaFormatValidator.validateVideoOutputFormat(mVideoTrackTranscoder.getDeterminedFormat());
